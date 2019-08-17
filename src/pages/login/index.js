@@ -1,6 +1,7 @@
 //引入的模块
 import React, { Component } from 'react';
-import { Form, Input, Icon, Button } from "antd";
+import { Form, Input, Icon, Button,message } from "antd";
+import {reqLogin} from "../../api";
 //自定的模块
 import logo from "./logo.png";
 import "./index.less";
@@ -26,6 +27,31 @@ const Item = Form.Item;
        callback(`${name}只能包含英文，数字，下划线`);
      }
      callback();
+   };
+
+   //这个方法是用来做表单验证的
+   //1.定义方法  禁止默认行为
+   login = (e) => {
+     e.preventDefault();//禁止默认行为e.preventDefault
+     this.props.form.validateFields((err,values) => {
+       console.log(err, values);
+       //err表单校验失败的任务
+       //values表单校验成功的值
+       if (!err){
+         //如果没有错误就yong许登录，发登录请求
+         const { username,password } = values
+         reqLogin(username,password)
+           .then((response) => {
+             console.log(response);
+             message.success("登录成功啦",3)
+           })
+           .catch((error) => {
+             message.error("登录失败，网络异常",3)
+             this.props.from.resetFields(["password"]);
+           })
+       }
+       //有错误就不允许登录 返回错误
+     })
    };
   render() {
     //这是从form中提取的一个属性 作用是表单验证
@@ -97,7 +123,7 @@ const Item = Form.Item;
                 }
               )
               (
-                <Input prefix={ <Icon type="lock" /> } placeholder="密码"/>
+                <Input  prefix={ <Icon type="lock" /> } placeholder="密码"/>
               )
             }
           </Item>
